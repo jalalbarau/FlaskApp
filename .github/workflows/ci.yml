@@ -39,7 +39,11 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t barau16/flashapp:${{ github.sha }} .
+        run: |
+          docker build -t barau16/flashapp:${{ github.sha }} .
+          docker tag barau16/flashapp:${{ github.sha }} barau16/flashapp:latest
 
       - name: Push Docker image
-        run: docker push barau16/flashapp:${{ github.sha }}
+        run: |
+          docker push barau16/flashapp:${{ github.sha }}
+          docker push barau16/flashapp:latest
