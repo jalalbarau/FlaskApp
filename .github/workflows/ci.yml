@@ -39,7 +39,28 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t barau16/flashapp:${{ github.sha }} .
+        run: |
+          docker build -t barau16/flashapp:${{ github.sha }} .
+          docker tag barau16/flashapp:${{ github.sha }} barau16/flashapp:latest
 
       - name: Push Docker image
-        run: docker push barau16/flashapp:${{ github.sha }}
+        run: |
+          docker push barau16/flashapp:${{ github.sha }}
+          docker push barau16/flashapp:latest
+
+notify-on-failure:
+  needs: [tests, build-and-push]
+  if: failure()
+  runs-on: ubuntu-latest
+  steps:
+    - name: Send failure email
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: ${{ secrets.MAIL_SERVER }}
+        server_port: ${{ secrets.MAIL_PORT }}
+        username: ${{ secrets.MAIL_USERNAME }}
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: "CI Failed for FlaskApp"
+        body: "A CI failure occurred in your repository."
+        to: ${{ secrets.MAIL_TO }}
+        from: ${{ secrets.MAIL_USERNAME }}
